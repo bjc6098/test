@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>api2.0_Event</title>
+<meta http-equiv='content-type' content='text/html; charset=UTF-8'>
+<meta http-equiv='content-type' content='text/javascript; charset=utf-8'>
+<script type='text/javascript' src='http://map.vworld.kr/js/vworldMapInit.js.do?version=2.0&apiKey=E2702605-6AF7-3F98-A742-ADA8863550C9'></script>
+</head>
+<body>
+<div id='vmap' style='width:100%;height:350px;left:0px;top:0px'></div>
+<table>
+ <tr>
+  <td>아이디 : <input type='text' id='buildingId' name='buildingId' value=''></td>
+  <td>타입 : <input type='text' id='buildingType' name=buildingType value=''></td>
+  <td>레이어 이름 : <input type='text' id='buildingLayerName' name='buildingLayerName' value=''></td>
+ </tr>
+</table>
+<script type='text/javascript'>
+//---------- 지도 초기화 -------------
+
+// 우주에서 보는 지구 시점
+//homePosition ||  지구본
+var hX = 127.425;
+var hY = 38.196;
+var hZ = 13487000;
+var hH = 0;
+var hT = 90;
+var hR = 0;
+
+// 페이지 초기화시 지도의 카메라 시점이 여의도 좌표이동
+//initPosition || 여의도
+var sX = 126.97005361917438;
+var sY = 37.513398668248875;
+var sZ = 5000;
+var sH = 0;
+var sT = 50;
+var sR = 0;
+
+var opt = new vw.MapOptions(vw.BasemapType.GRAPHIC,
+  '',
+  vw.DensityType.FULL,
+  vw.DensityType.BASIC,
+  // 지구본
+  new vw.CameraPosition(new vw.CoordZ(hX, hY, hZ),  new vw.Direction(hH, hT, hR)),
+  // 여의도
+  new vw.CameraPosition(new vw.CoordZ(sX, sY, sZ),  new vw.Direction(sH, sT, sR))
+);
+
+map = new vw.Map('vmap', opt);
+// ---------- 지도 초기화 -------------
+
+
+// ---------- mouseEvent js --------------
+var interSelect = new vw.interaction.Select();
+interSelect.setEnabled(true);
+
+var vwEventLast;
+var buildingId = $id('buildingId'), buildingType = $id('buildingType'), buildingLayerName = $id('buildingLayerName');
+var tmpX2 = '';
+var tmpY2 = '';
+
+map.on('onLMouseUp', v3MapEventListenerCallback);
+map.on('onLMouseDown', v3MapEventListenerCallbackTmp);
+
+
+function v3MapEventListenerCallbackTmp(pSender, pPixel, pCoord, pWheel, pCtrlKey, pShiftKey, pAltKey, pHandled,targetObj,layObj){
+ if(map.getInteractions().getExclusive() == null){
+   tmpX2 = pCoord.x;
+   tmpY2 = pCoord.y;
+ }
+}
+
+function v3MapEventListenerCallback(pSender, pPixel, pCoord, pWheel, pCtrlKey, pShiftKey, pAltKey, pHandled,targetObj,layObj){
+
+ if(map.getInteractions().getExclusive() == null){
+   vwEventLast = targetObj;
+   try{
+    if(tmpX2 == pCoord.x && tmpY2 == pCoord.y){
+     if(layObj != null && layObj.getName() == 'facility_build'){
+
+      var col = new vw.Color(255, 255, 0, 125).getSopColor();
+      map._XDcom.getView().setSelectColor(col);
+      map._XDcom.getView().setSelectObject(targetObj);
+
+      buildingId.value = vwEventLast.getId();
+      buildingType.value = vwEventLast.getType();
+      buildingLayerName.value = layObj.getName();
+           }
+          }
+   }catch(e){}
+ }else{
+  vwEventLast = null;
+ }
+}
+
+function $id(id){
+ return document.getElementById(id);
+}
+// ---------- mouseEvent js --------------
+
+</script>
+</body>
+</html>
